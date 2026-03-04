@@ -1,0 +1,126 @@
+---
+title: "API overview"
+description: "Introduction to the AgentSpace REST API"
+---
+
+## Introduction
+
+The AgentSpace REST API provides access to AI-powered agents that can answer questions, translate text, and summarize research papers. The API is built on Express.js and uses OpenAI's agent framework to deliver intelligent responses.
+
+## Base URL
+
+All API requests should be made to:
+
+```
+http://localhost:8090
+```
+
+## API Structure
+
+The AgentSpace API follows RESTful principles and is organized around agent-specific endpoints. All endpoints are prefixed with `/agents` and provide access to specialized AI agents with distinct capabilities.
+
+### Design Philosophy
+
+- **Agent-based architecture**: Each endpoint corresponds to a specialized AI agent with specific expertise
+- **Simple request/response pattern**: Send questions or files, receive intelligent answers
+- **JSON-first**: All requests and responses use JSON format (except file uploads)
+- **Synchronous processing**: Agents process requests and return results immediately
+
+## Available Endpoints
+
+AgentSpace provides three specialized agent endpoints:
+
+1. **History Agent** - `GET /agents/history`  
+   Ask questions about world history and receive expert answers from an AI historian.
+
+2. **Translation Agent** - `GET /agents/translate`  
+   Get assistance with language translation and linguistic questions from an AI linguist.
+
+3. **Context Summarizer Agent** - `POST /agents/context-summarizer`  
+   Upload research papers (PDF) and receive clear, accessible summaries of key findings.
+
+## Request/Response Format
+
+### JSON Requests
+
+For the History and Translation agents, send questions in the request body:
+
+```json
+{
+  "question": "Your question here"
+}
+```
+
+### File Upload Requests
+
+The Context Summarizer agent accepts multipart/form-data requests with a PDF file attachment.
+
+### Response Format
+
+Successful responses return JSON with the agent's output:
+
+```json
+{
+  "answer": "Agent response here"
+}
+```
+
+Or for summaries:
+
+```json
+{
+  "summary": "Research paper summary here"
+}
+```
+
+### Error Responses
+
+Errors are returned with appropriate HTTP status codes and error messages:
+
+```json
+{
+  "error": "Error description"
+}
+```
+
+Common status codes:
+- `400` - Bad Request (missing or invalid parameters)
+- `500` - Internal Server Error (processing failures)
+
+## Common Patterns
+
+### Question-Answer Pattern
+
+The History and Translation agents follow a simple question-answer pattern:
+
+1. Send a question in the request body
+2. Receive an intelligent answer based on the agent's expertise
+3. Questions are required (returns 400 error if missing)
+
+### File Processing Pattern
+
+The Context Summarizer agent processes uploaded files:
+
+1. Upload a PDF research paper via multipart/form-data
+2. The agent extracts and analyzes the content
+3. Receive a structured summary of key findings
+4. Uploaded files are automatically cleaned up after processing
+
+### Error Handling
+
+All endpoints implement consistent error handling:
+
+- Input validation with descriptive error messages
+- Try-catch blocks for graceful error recovery
+- Appropriate HTTP status codes
+- Generic error messages to avoid exposing internal details
+
+## Next Steps
+
+- Review [Authentication](/api/authentication) to understand security considerations
+- Explore individual endpoint documentation for detailed usage examples
+- Learn about rate limiting and best practices for production deployments
+
+## Need Help?
+
+For questions or issues with the AgentSpace API, please refer to the individual endpoint documentation or contact the development team.

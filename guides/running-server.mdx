@@ -1,0 +1,280 @@
+---
+title: 'Running the server'
+description: 'Learn how to run and configure AgentSpace'
+---
+
+## Starting the Server
+
+AgentSpace can be run in two modes: development and production.
+
+### Development Mode
+
+For local development with hot-reloading:
+
+```bash
+npm run dev
+```
+
+This command:
+- Formats code automatically
+- Compiles TypeScript on-the-fly
+- Starts the server with nodemon
+- Watches for file changes in `cmd/` and `internal/`
+- Restarts automatically when changes are detected
+- Enables debug logging with `DEBUG=agentspace*`
+
+The server will start at **http://localhost:8090**
+
+### Production Mode
+
+For production deployment:
+
+```bash
+# Build the project first
+npm run build
+
+# Run the production build
+npm run dev:prod
+```
+
+Production mode:
+- Runs from compiled JavaScript in `build/`
+- Sets `NODE_ENV=production`
+- Uses the dotenv config loader
+- Enables debug logging (`DEBUG=agentspace*`)
+
+The server will start at **http://localhost:8090**
+
+## Server Configuration
+
+### Port Configuration
+
+AgentSpace runs on port **8090** by default. This is configured in `cmd/agentspace/main.ts:3`:
+
+```typescript
+initAgentspaceServer().listen(8090);
+```
+
+To change the port, you can modify this file or set up an environment variable:
+
+```typescript
+const PORT = process.env.PORT || 8090;
+initAgentspaceServer().listen(PORT);
+```
+
+### Environment Variables
+
+Required and optional environment variables:
+
+| Variable | Type | Description | Default |
+|----------|------|-------------|---------||
+| `OPENAI_API_KEY` | Required | OpenAI API key for agent operations | None |
+| `NODE_ENV` | Optional | Environment mode | `development` |
+| `DEBUG` | Optional | Debug logging namespace | None |
+| `PORT` | Optional | Server port (requires code modification) | `8090` |
+
+### Environment File
+
+Create a `.env` file in the project root:
+
+```bash
+OPENAI_API_KEY=sk-proj-...
+NODE_ENV=development
+DEBUG=agentspace*
+```
+
+## Logging and Debugging
+
+AgentSpace uses the `debug` package for structured logging.
+
+### Enabling Debug Logs
+
+Set the `DEBUG` environment variable to control log output:
+
+```bash
+# Enable all AgentSpace logs
+DEBUG=agentspace* npm run dev
+
+# Enable specific module logs
+DEBUG=agentspace:cmd/server npm run dev
+
+# Enable multiple namespaces
+DEBUG=agentspace*,express:* npm run dev
+
+# Disable all debug logs
+npm run dev
+```
+
+### Log Levels
+
+The Logger class (`internal/common/logger.ts`) supports three levels:
+
+- **INFO**: General information messages
+- **ERROR**: Error messages
+- **DEBUG**: Detailed debugging information
+
+### Debug Namespaces
+
+AgentSpace uses the following debug namespaces:
+
+- `agentspace:cmd/server` - Server startup and configuration
+- `agentspace:context-summarizer` - Context summarizer agent logs
+- Additional namespaces follow the pattern `agentspace:<module-path>`
+
+### Server Startup Log
+
+When the server starts successfully, you'll see:
+
+```
+agentspace:cmd/server agentspace live at http://localhost:8090
+```
+
+## Build Process
+
+The build process ensures code quality and correctness:
+
+```bash
+npm run build
+```
+
+### Build Steps
+
+1. **Format**: `prettier --write .`
+   - Formats all code according to `.prettierrc`
+
+2. **Format Check**: `prettier --check .`
+   - Verifies formatting is correct
+
+3. **Lint**: `eslint .`
+   - Checks code for linting errors
+
+4. **Circular Dependency Check**: `madge --circular`
+   - Detects circular dependencies in `cmd/` and `internal/`
+
+5. **TypeScript Compilation**: `tsc -b`
+   - Compiles TypeScript to JavaScript
+   - Outputs to `build/` directory
+   - Generates source maps and type declarations
+
+### Build Output
+
+After building, the `build/` directory contains:
+
+```
+build/
+├── cmd/
+│   └── agentspace/
+│       ├── main.js
+│       ├── main.js.map
+│       ├── main.d.ts
+│       └── main.d.ts.map
+├── internal/
+│   ├── agents/
+│   ├── router/
+│   ├── server/
+│   └── common/
+└── app.js                   # Main entry point
+```
+
+## Production Deployment
+
+### Prerequisites
+
+1. Ensure all environment variables are configured
+2. Run a full build to verify everything compiles
+3. Test the production build locally
+
+### Deployment Steps
+
+```bash
+# 1. Build the project
+npm run build
+
+# 2. Test production build locally
+npm run dev:prod
+
+# 3. Deploy the build directory
+# Copy the following to your production server:
+# - build/
+# - node_modules/
+# - package.json
+# - .env (with production values)
+
+# 4. Run in production
+NODE_ENV=production node -r dotenv/config build/app.js
+```
+
+### Production Considerations
+
+- **Process Management**: Use PM2 or similar for process management:
+  ```bash
+  pm2 start build/app.js --name agentspace
+  ```
+
+- **Reverse Proxy**: Use nginx or similar for SSL and load balancing
+
+- **Environment Variables**: Never commit `.env` files with secrets
+
+- **Logging**: Consider redirecting logs to a file or logging service:
+  ```bash
+  DEBUG=agentspace* node build/app.js > logs/agentspace.log 2>&1
+  ```
+
+- **Health Checks**: Implement health check endpoints for monitoring
+
+- **Resource Limits**: Monitor memory and CPU usage, especially with multiple concurrent agent requests
+
+## Troubleshooting
+
+### Server Won't Start
+
+**Port already in use**:
+```
+Error: listen EADDRINUSE: address already in use :::8090
+```
+
+Solution: Kill the process using port 8090 or change the port:
+```bash
+# Find and kill the process
+lsof -ti:8090 | xargs kill -9
+
+# Or use a different port (requires code modification)
+```
+
+**Missing OpenAI API key**:
+```
+Error: OpenAI API key not found
+```
+
+Solution: Add `OPENAI_API_KEY` to your `.env` file
+
+### Build Failures
+
+**TypeScript errors**:
+- Check `tsconfig.json` configuration
+- Ensure all dependencies are installed
+- Run `npm install` again
+
+**Circular dependencies**:
+- Review the madge output
+- Refactor code to remove circular imports
+
+### No Debug Output
+
+If debug logs aren't appearing:
+
+```bash
+# Make sure DEBUG is set
+echo $DEBUG  # Should output: agentspace*
+
+# Set it explicitly
+export DEBUG=agentspace*
+npm run dev
+```
+
+## Next Steps
+
+Now that your server is running:
+
+- [Learn how to use agents](/guides/using-agents) to make requests
+- Explore the agent endpoints at http://localhost:8090/agents

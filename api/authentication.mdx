@@ -1,0 +1,235 @@
+---
+title: "Authentication"
+description: "Learn about API authentication"
+---
+
+## Current Authentication Status
+
+<Warning>
+  **No Authentication Implemented**: The AgentSpace API currently does not implement any authentication mechanism. All endpoints are publicly accessible without credentials.
+</Warning>
+
+As of the current implementation, the AgentSpace API does not require any authentication headers, API keys, or tokens. Any client that can reach `http://localhost:8090` can make requests to all available endpoints.
+
+### What This Means
+
+- No API keys or tokens are required
+- No authentication headers needed in requests
+- All agents are publicly accessible
+- No user identification or request tracking
+
+## Security Considerations
+
+### Current Risks
+
+Running the API without authentication poses several security risks:
+
+1. **Unauthorized Access**: Anyone with network access can use your AI agents
+2. **Resource Abuse**: No limits on who can consume API resources
+3. **Cost Management**: Unable to track or limit OpenAI API usage per user
+4. **Data Privacy**: No way to isolate or protect user-specific data
+5. **Audit Trail**: Cannot identify who made specific requests
+
+### Localhost-Only Deployment
+
+The current setup (`http://localhost:8090`) provides some protection:
+
+- Only accessible from the local machine by default
+- Network-level isolation prevents remote access
+- Suitable for development and testing environments
+
+<Note>
+  The localhost-only deployment is NOT a security control for production environments.
+</Note>
+
+## Future Authentication Recommendations
+
+Before deploying AgentSpace to production or exposing it beyond localhost, implement one or more of these authentication mechanisms:
+
+### 1. API Key Authentication
+
+**Recommended for**: Service-to-service communication, simple deployments
+
+```javascript
+// Example middleware
+const validateApiKey = (req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+  if (!apiKey || !isValidApiKey(apiKey)) {
+    return res.status(401).json({ error: 'Invalid API key' });
+  }
+  next();
+};
+```
+
+**Pros**:
+- Simple to implement and use
+- Low overhead
+- Works well for automated systems
+
+**Cons**:
+- Keys can be compromised if exposed
+- No built-in expiration
+- Limited granular permissions
+
+### 2. JWT (JSON Web Tokens)
+
+**Recommended for**: User-facing applications, session management
+
+```javascript
+// Example middleware
+const validateJWT = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+```
+
+**Pros**:
+- Stateless authentication
+- Built-in expiration
+- Can include user metadata
+- Industry standard
+
+**Cons**:
+- Requires token management
+- More complex than API keys
+- Need refresh token strategy
+
+### 3. OAuth 2.0
+
+**Recommended for**: Third-party integrations, enterprise deployments
+
+**Pros**:
+- Industry-standard authorization framework
+- Delegated access control
+- Scoped permissions
+- Supports multiple grant types
+
+**Cons**:
+- Most complex to implement
+- Requires authorization server
+- Overkill for simple use cases
+
+## Best Practices for Deployment
+
+When you add authentication to AgentSpace, follow these best practices:
+
+### 1. Environment Variables
+
+Store all secrets in environment variables, never in code:
+
+```bash
+API_SECRET_KEY=your-secret-key
+JWT_SECRET=your-jwt-secret
+OPENAI_API_KEY=your-openai-key
+```
+
+### 2. HTTPS Only
+
+Always use HTTPS in production to encrypt authentication credentials in transit:
+
+- Obtain SSL/TLS certificates
+- Redirect HTTP to HTTPS
+- Use secure cookie flags
+
+### 3. Rate Limiting
+
+Implement rate limiting to prevent abuse:
+
+```javascript
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each key to 100 requests per window
+});
+
+app.use('/agents', limiter);
+```
+
+### 4. Request Logging
+
+Log all API requests with user identification:
+
+- Track who accessed which endpoints
+- Monitor for suspicious patterns
+- Enable audit trails
+- Support debugging and troubleshooting
+
+### 5. Scope Permissions
+
+Implement different access levels if needed:
+
+- Read-only vs. full access
+- Agent-specific permissions
+- Rate limits per tier
+- Feature flags per user
+
+### 6. Credential Rotation
+
+Establish a process for rotating credentials:
+
+- Regular API key rotation
+- Token expiration policies
+- Revocation mechanisms
+- Emergency credential invalidation
+
+## Implementation Checklist
+
+Before going to production, ensure you:
+
+- [ ] Choose an authentication mechanism
+- [ ] Implement authentication middleware
+- [ ] Add authentication to all `/agents/*` endpoints
+- [ ] Store secrets in environment variables
+- [ ] Enable HTTPS
+- [ ] Implement rate limiting
+- [ ] Add request logging with user identification
+- [ ] Test authentication with various scenarios
+- [ ] Document authentication requirements for API consumers
+- [ ] Set up credential rotation processes
+- [ ] Create monitoring alerts for authentication failures
+
+## Development vs. Production
+
+### Development Environment
+
+For local development, the current no-auth setup is acceptable:
+
+- Fast iteration
+- No credential management overhead
+- Localhost-only access
+- Isolated from public networks
+
+### Production Environment
+
+<Warning>
+  Never deploy AgentSpace to production without implementing authentication.
+</Warning>
+
+Production deployments **must** include:
+
+- Authentication mechanism
+- HTTPS encryption
+- Rate limiting
+- Request logging
+- Monitoring and alerting
+- Firewall rules
+- Security headers
+
+## Next Steps
+
+1. Review the [API Overview](/api/overview) to understand endpoint structure
+2. Plan your authentication strategy based on your deployment needs
+3. Implement authentication middleware before production deployment
+4. Test thoroughly with authentication enabled
+5. Monitor authentication failures and adjust as needed
+
+## Questions?
+
+If you need guidance on implementing authentication for your specific use case, consult with your security team or reach out to the AgentSpace development team.

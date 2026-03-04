@@ -1,0 +1,177 @@
+---
+title: 'Development setup'
+description: 'Set up your development environment for AgentSpace'
+---
+
+## Prerequisites
+
+Before setting up AgentSpace, ensure you have the following installed:
+
+- **Node.js** (v18 or higher recommended)
+- **npm** (comes with Node.js)
+- **OpenAI API key** - Required for agent functionality
+
+## Installation
+
+1. Clone the repository and navigate to the project directory:
+
+```bash
+cd workspace/source
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+AgentSpace uses the following key dependencies:
+- `express` - Web server framework
+- `@openai/agents` - OpenAI Agents SDK
+- `typescript` - For TypeScript compilation
+- `nodemon` - Development hot-reloading
+
+## Environment Configuration
+
+AgentSpace requires environment variables for proper operation. Create a `.env` file in the project root:
+
+```bash
+# Required: OpenAI API key for agent functionality
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional: Enable debug logging
+DEBUG=agentspace*
+
+# Optional: Node environment (development/production)
+NODE_ENV=development
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPENAI_API_KEY` | Yes | Your OpenAI API key for agent operations |
+| `DEBUG` | No | Enable debug logging (use `agentspace*` to see all logs) |
+| `NODE_ENV` | No | Set to `development` or `production` |
+
+## Development vs Production Mode
+
+### Development Mode
+
+Development mode includes:
+- Automatic code formatting with Prettier
+- Hot-reloading with nodemon
+- TypeScript compilation on-the-fly with tsx
+- Debug logging enabled by default
+- Watches `cmd/` and `internal/` directories for changes
+
+### Production Mode
+
+Production mode includes:
+- Full build process with linting and circular dependency checks
+- Compiled JavaScript output in `build/` directory
+- Optimized for performance
+- Source maps and type declarations included
+
+## Available npm Scripts
+
+AgentSpace provides several npm scripts for development and deployment:
+
+### Development
+
+```bash
+# Start development server with hot-reloading
+npm run dev
+```
+
+This command:
+- Formats code with Prettier
+- Compiles TypeScript
+- Starts the server with nodemon
+- Watches for changes in `cmd/` and `internal/` directories
+- Enables debug logging (`DEBUG=agentspace*`)
+
+### Build
+
+```bash
+# Full production build
+npm run build
+```
+
+Build process includes:
+1. Code formatting with Prettier
+2. Format verification
+3. ESLint checks
+4. Circular dependency detection with madge
+5. TypeScript compilation
+
+### Production
+
+```bash
+# Run production build
+npm run dev:prod
+```
+
+Runs the compiled production build with debug logging enabled.
+
+### Code Quality
+
+```bash
+# Format code
+npm run format
+
+# Check formatting without changes
+npm run format:check
+
+# Run ESLint
+npm run lint:check
+
+# Check for circular dependencies
+npm run madge:check-build
+```
+
+## Project Structure
+
+AgentSpace follows a modular structure:
+
+```
+source/
+├── cmd/
+│   └── agentspace/
+│       └── main.ts          # Application entry point
+├── internal/
+│   ├── agents/              # Agent implementations
+│   ├── router/              # Express route handlers
+│   ├── server/              # Server configuration
+│   └── common/              # Shared utilities
+├── build/                   # Compiled output (after build)
+├── tsconfig.json           # TypeScript configuration
+└── package.json            # Dependencies and scripts
+```
+
+## TypeScript Configuration
+
+AgentSpace uses modern TypeScript features:
+
+- **Target**: ESNext with NodeNext module resolution
+- **Strict mode**: Enabled for type safety
+- **Source maps**: Generated for debugging
+- **Output**: Compiled to `build/` directory
+- **Verbatim module syntax**: For ES module compatibility
+
+## Code Style
+
+AgentSpace uses Prettier for consistent code formatting:
+
+- **Print width**: 100 characters
+- **Tab width**: 2 spaces
+- **Semicolons**: Required
+- **Quotes**: Single quotes
+- **Trailing commas**: ES5 style
+
+## Next Steps
+
+Once your environment is set up:
+
+1. [Run the server](/guides/running-server) to start AgentSpace
+2. [Learn about agents](/guides/using-agents) to make requests

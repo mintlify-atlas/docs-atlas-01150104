@@ -1,80 +1,131 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get up and running with AgentSpace in minutes
 ---
 
-## Get started in three steps
+<Steps>
+  <Step title="Clone repository and install dependencies">
+    First, clone the AgentSpace repository and install all required dependencies:
 
-Get your documentation site running locally and make your first customization.
+    ```bash
+    git clone <repository-url>
+    cd source
+    npm install
+    ```
 
-### Step 1: Set up your local environment
+    This will install all the necessary packages including Express.js, OpenAI Agents SDK, TypeScript, and development tools.
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Set up environment variables">
+    Create a `.env` file in the root directory and add your OpenAI API key:
 
-### Step 2: Deploy your changes
+    ```bash .env
+    OPENAI_API_KEY=your_openai_api_key_here
+    ```
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    <Warning>
+      You need a valid OpenAI API key to use AgentSpace. Get one from the [OpenAI Platform](https://platform.openai.com/api-keys).
+    </Warning>
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Run the development server">
+    Start the development server with hot-reloading enabled:
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    npm run dev
+    ```
 
-### Step 3: Go live
+    The server will start on port `8090`. You should see:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    ```bash
+    agentspace live at http://localhost:8090
+    ```
 
-## Next steps
+    <Note>
+      The dev command automatically formats code, builds TypeScript, and watches for changes.
+    </Note>
+  </Step>
 
-Now that you have your docs running, explore these key features:
+  <Step title="Test your first agent">
+    Test the translation agent with a simple curl command:
+
+    ```bash
+    curl -X GET http://localhost:8090/agents/translate \
+      -H "Content-Type: application/json" \
+      -d '{
+        "question": "How do you say hello in French?"
+      }'
+    ```
+
+    You should receive a response like:
+
+    ```json
+    {
+      "answer": "In French, you say 'Bonjour' for hello."
+    }
+    ```
+  </Step>
+</Steps>
+
+## Available Endpoints
+
+Once your server is running, you can interact with these endpoints:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/agents/translate` | GET | Translate text and answer language questions |
+| `/agents/history` | GET | Answer questions about world history |
+| `/agents/context-summarizer` | POST | Summarize PDF research papers |
+
+## Testing the PDF Summarizer
+
+To test the PDF summarizer agent, use a multipart/form-data request:
+
+```bash
+curl -X POST http://localhost:8090/agents/context-summarizer \
+  -F "file=@/path/to/research-paper.pdf"
+```
+
+The agent will extract text from the PDF and return a structured summary with:
+- Main research question or objective
+- Methods and approach
+- Key findings and results
+- Significance and implications
+
+## Request Format
+
+For the translation and history agents, send JSON requests with a `question` field:
+
+```json
+{
+  "question": "Your question here"
+}
+```
+
+**Example: History Agent**
+```bash
+curl -X GET http://localhost:8090/agents/history \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Who was the first emperor of Rome?"
+  }'
+```
+
+## Next Steps
+
+Now that you have AgentSpace running, you can:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Explore the API" icon="code" href="/api/overview">
+    Learn about all available endpoints and request formats
+  </Card>
+  <Card title="Using Agents" icon="wand-magic-sparkles" href="/guides/using-agents">
+    Learn how to make requests to AgentSpace agents
+  </Card>
+  <Card title="Running the Server" icon="rocket" href="/guides/running-server">
+    Configure and deploy your AgentSpace instance
+  </Card>
+  <Card title="Understanding Agents" icon="robot" href="/concepts/agents">
+    Learn about the AI agents in AgentSpace
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

@@ -1,0 +1,63 @@
+---
+title: Introduction
+description: Learn about AgentSpace and its AI-powered agent capabilities
+---
+
+## What is AgentSpace?
+
+AgentSpace is a powerful AI agent platform built on Express.js that provides a REST API for interacting with specialized AI agents. It leverages OpenAI's Agents SDK to deliver intelligent responses across multiple domains including translation, history, and document summarization.
+
+The platform exposes simple HTTP endpoints that allow you to integrate AI-powered capabilities into your applications with minimal setup.
+
+## Key Features
+
+AgentSpace comes with three pre-built specialized agents:
+
+<CardGroup cols={3}>
+  <Card title="Translation Agent" icon="language">
+    A skilled linguist that can translate text between languages and answer language-related questions.
+  </Card>
+  <Card title="History Agent" icon="book">
+    An expert in world history that can answer questions and provide historical context.
+  </Card>
+  <Card title="PDF Summarizer" icon="file-pdf">
+    Analyzes and summarizes academic research papers, extracting key findings and insights.
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+- **Multilingual Applications**: Add translation capabilities to your apps
+- **Educational Platforms**: Provide instant answers to history questions
+- **Research Tools**: Quickly summarize academic papers and research documents
+- **Content Analysis**: Extract key insights from PDF documents
+- **API Integration**: Embed AI capabilities into existing workflows
+
+## Tech Stack
+
+AgentSpace is built with modern, production-ready technologies:
+
+- **Express.js**: Fast, minimalist web framework for Node.js
+- **OpenAI Agents SDK**: Official SDK for building AI agents (`@openai/agents`)
+- **TypeScript**: Type-safe development with full IDE support
+- **Multer**: Middleware for handling file uploads
+- **pdf-parse**: Extract text content from PDF files
+
+## Architecture
+
+The platform follows a clean, modular architecture:
+
+```
+cmd/agentspace/       # Application entry point
+internal/
+  ├── server/         # Express server initialization
+  ├── router/         # API route definitions
+  ├── agents/         # AI agent implementations
+  └── common/         # Shared utilities
+```
+
+Each agent is implemented as a separate module with its own specialized instructions, making it easy to add new agents or customize existing ones.
+
+## Getting Started
+
+Ready to start using AgentSpace? Check out the [Quickstart guide](/quickstart) to get up and running in minutes.

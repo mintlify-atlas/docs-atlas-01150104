@@ -1,97 +1,153 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "AgentSpace Documentation"
+description: "AI-powered agents for translation, history, and document analysis"
+mode: "custom"
 ---
 
-## Setting up
+<div className="relative overflow-hidden bg-gradient-to-br from-[#6366f1] via-[#4f46e5] to-[#4338ca] dark:from-[#4f46e5] dark:via-[#4338ca] dark:to-[#3730a3] py-20">
+  <div className="max-w-6xl mx-auto px-6 lg:px-8">
+    <div className="grid lg:grid-cols-12 gap-12 items-center">
+      <div className="lg:col-span-7">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+          Welcome to AgentSpace
+        </h1>
+        <p className="text-base sm:text-lg lg:text-xl text-white/90 max-w-2xl mb-8">
+          A powerful AI agent platform that provides specialized agents for language translation, historical queries, and intelligent document summarization via REST API endpoints.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <a 
+            href="/quickstart" 
+            className="inline-flex items-center px-6 py-3 bg-white text-[#6366f1] font-semibold rounded-lg hover:bg-white/90 transition-colors no-underline"
+          >
+            Get Started
+          </a>
+          <a 
+            href="/api/overview" 
+            className="inline-flex items-center px-6 py-3 border border-white/30 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-lg hover:bg-white/20 transition-colors no-underline"
+          >
+            Explore API
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-Get your documentation site up and running in minutes.
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">
+    Quick start
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Get up and running with AgentSpace in minutes
+  </p>
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+  <Steps>
+    <Step title="Install dependencies">
+      Clone the repository and install the required packages:
+      
+      ```bash
+      git clone https://github.com/nielchaudhary/agentspace.git
+      cd agentspace
+      npm install
+      ```
+    </Step>
+    
+    <Step title="Configure environment">
+      Set up your OpenAI API key in a `.env` file:
+      
+      ```bash
+      OPENAI_API_KEY=your_api_key_here
+      ```
+    </Step>
+    
+    <Step title="Start the server">
+      Run the development server:
+      
+      ```bash
+      npm run dev
+      ```
+      
+      The server will start at `http://localhost:8090`
+    </Step>
+    
+    <Step title="Make your first request">
+      Test the translation agent:
+      
+      ```bash
+      curl http://localhost:8090/agents/translate \
+        -H "Content-Type: application/json" \
+        -d '{"question": "Translate hello to Spanish"}'
+      ```
+      
+      <Accordion title="Example response">
+        ```json
+        {
+          "answer": "The Spanish translation of 'hello' is 'hola'."
+        }
+        ```
+      </Accordion>
+    </Step>
+  </Steps>
+</div>
 
-## Make it yours
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">
+    Explore by topic
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Learn about core concepts and dive into guides
+  </p>
 
-Design a docs site that looks great and empowers your users.
+  <CardGroup cols={2}>
+    <Card title="AI Agents" icon="robot" href="/concepts/agents">
+      Understand how the specialized agents work and what they can do
+    </Card>
+    <Card title="Architecture" icon="sitemap" href="/concepts/architecture">
+      Learn about the server structure and routing system
+    </Card>
+    <Card title="Running the Server" icon="server" href="/guides/running-server">
+      Configure and deploy your AgentSpace instance
+    </Card>
+    <Card title="Using Agents" icon="wand-magic-sparkles" href="/guides/using-agents">
+      Make requests and integrate agents into your application
+    </Card>
+  </CardGroup>
+</div>
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">
+    API endpoints
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Explore the available AI agent endpoints
+  </p>
 
-## Create beautiful pages
+  <CardGroup cols={3}>
+    <Card title="History Agent" icon="book" href="/api/history-agent">
+      Ask questions about world history
+    </Card>
+    <Card title="Translation Agent" icon="language" href="/api/translate-agent">
+      Translate text between languages
+    </Card>
+    <Card title="Context Summarizer" icon="file-lines" href="/api/context-summarizer">
+      Analyze and summarize PDF documents
+    </Card>
+  </CardGroup>
+</div>
 
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <div className="rounded-2xl border border-gray-200 dark:border-[#27272a] bg-gray-50 dark:bg-[#1a1d27] p-8 sm:p-12">
+    <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+      Ready to build with AI agents?
+    </h2>
+    <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
+      Start integrating powerful AI capabilities into your applications with AgentSpace's simple REST API.
+    </p>
+    <a 
+      href="/quickstart" 
+      className="inline-flex items-center px-6 py-3 bg-[#6366f1] text-white font-semibold rounded-lg hover:bg-[#4f46e5] transition-colors no-underline"
+    >
+      Get Started Now
+    </a>
+  </div>
+</div>

@@ -1,0 +1,125 @@
+---
+title: "History agent"
+description: "Ask questions about world history"
+---
+
+The history agent endpoint allows you to query information about world history. The agent is powered by an expert AI trained in historical events, figures, and timelines.
+
+## Endpoint
+
+```
+GET /agents/history
+```
+
+## Request Parameters
+
+<ParamField body="question" type="string" required>
+  The history question you want to ask. This should be a clear, specific question about world history.
+</ParamField>
+
+## Request Example
+
+```bash
+curl -X GET https://api.agentspace.com/agents/history \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What were the main causes of World War I?"
+  }'
+```
+
+## Response Format
+
+<ResponseField name="answer" type="string">
+  The detailed answer to your history question provided by the expert agent.
+</ResponseField>
+
+## Response Example
+
+```json
+{
+  "answer": "World War I was caused by a complex combination of factors including: the alliance system that divided Europe into two camps, militarism and arms races between major powers, imperial rivalries over colonies and resources, and rising nationalism. The immediate trigger was the assassination of Archduke Franz Ferdinand of Austria in Sarajevo on June 28, 1914, which set off a chain reaction of declarations of war due to the alliance commitments."
+}
+```
+
+## Error Responses
+
+<Accordion title="400 Bad Request">
+  Returned when the `question` parameter is missing or empty.
+  
+  ```json
+  {
+    "error": "Question is required"
+  }
+  ```
+</Accordion>
+
+<Accordion title="500 Internal Server Error">
+  Returned when the agent encounters an unexpected error during processing.
+  
+  ```json
+  {
+    "error": "Internal server error"
+  }
+  ```
+</Accordion>
+
+## Code Examples
+
+<CodeGroup>
+
+```javascript Node.js
+const response = await fetch('https://api.agentspace.com/agents/history', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    question: 'What were the main causes of World War I?'
+  })
+});
+
+const data = await response.json();
+console.log(data.answer);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.agentspace.com/agents/history',
+    json={'question': 'What were the main causes of World War I?'}
+)
+
+data = response.json()
+print(data['answer'])
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    requestBody, _ := json.Marshal(map[string]string{
+        "question": "What were the main causes of World War I?",
+    })
+
+    resp, _ := http.NewRequest("GET", "https://api.agentspace.com/agents/history", bytes.NewBuffer(requestBody))
+    resp.Header.Set("Content-Type", "application/json")
+    
+    client := &http.Client{}
+    response, _ := client.Do(resp)
+    defer response.Body.Close()
+    
+    var result map[string]string
+    json.NewDecoder(response.Body).Decode(&result)
+    fmt.Println(result["answer"])
+}
+```
+
+</CodeGroup>

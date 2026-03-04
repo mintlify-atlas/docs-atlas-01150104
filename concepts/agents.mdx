@@ -1,0 +1,313 @@
+---
+title: AI Agents
+description: Understanding the specialized AI agents in AgentSpace
+---
+
+## Overview
+
+AgentSpace uses specialized AI agents powered by the OpenAI Agents SDK to handle different types of tasks. Each agent is configured with specific instructions and expertise to provide accurate, focused responses in their domain.
+
+Agents in AgentSpace are built using the `@openai/agents` package, which provides a simple yet powerful interface for creating autonomous AI assistants that can process requests and return intelligent responses.
+
+## Agent Architecture
+
+All agents in AgentSpace follow a consistent pattern:
+
+```typescript
+import { Agent, run } from '@openai/agents';
+
+const myAgent = new Agent({
+  name: 'AgentName',
+  instructions: 'Specialized instructions for the agent',
+});
+
+const result = await run(myAgent, userInput);
+```
+
+The `run()` function executes the agent with the provided input and returns a result containing the `finalOutput` field with the agent's response.
+
+## Available Agents
+
+AgentSpace includes three specialized agents, each designed for specific use cases:
+
+<Tabs>
+  <Tab title="History Agent">
+    The History Agent is an expert in world history, capable of answering questions about historical events, figures, and periods.
+
+    ### Configuration
+
+    ```typescript
+    const historyAgent = new Agent({
+      name: 'HistoryAgent',
+      instructions: 'You are an expert in world history.',
+    });
+    ```
+
+    ### Implementation
+
+    Located in `source/internal/agents/history.ts:4-7`, the History Agent processes questions through a simple request handler:
+
+    ```typescript
+    export const getHistoryPostHandler = async (req: Request, res: Response) => {
+      const { question } = req.body as { question: string };
+
+      if (!question) {
+        return res.status(400).json({ error: 'Question is required' });
+      }
+
+      try {
+        const result = await run(historyAgent, question);
+        return res.send({ answer: result.finalOutput });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+    };
+    ```
+
+    ### API Endpoint
+
+    **GET** `/agents/history`
+
+    Request body:
+    ```json
+    {
+      "question": "What happened in 1492?"
+    }
+    ```
+
+    Response:
+    ```json
+    {
+      "answer": "In 1492, Christopher Columbus..."
+    }
+    ```
+  </Tab>
+
+  <Tab title="Translation Agent">
+    The Translation Agent is a skilled linguist capable of translating text between languages and providing language-related insights.
+
+    ### Configuration
+
+    ```typescript
+    const languageAgent = new Agent({
+      name: 'LanguageAgent',
+      instructions: 'You are a skilled linguist and translator.',
+    });
+    ```
+
+    ### Implementation
+
+    Located in `source/internal/agents/translate-agent.ts:4-7`, the Translation Agent handles language-related queries:
+
+    ```typescript
+    export const getTranslatedDataPostHandler = async (req: Request, res: Response) => {
+      const { question } = req.body as { question: string };
+
+      if (!question) {
+        return res.status(400).json({ error: 'Question is required' });
+      }
+
+      try {
+        const result = await run(languageAgent, question);
+        return res.send({ answer: result.finalOutput });
+      } catch (error) {
+        console.error('Translation error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+    };
+    ```
+
+    ### API Endpoint
+
+    **GET** `/agents/translate`
+
+    Request body:
+    ```json
+    {
+      "question": "Translate 'Hello, world!' to Spanish"
+    }
+    ```
+
+    Response:
+    ```json
+    {
+      "answer": "¡Hola, mundo!"
+    }
+    ```
+  </Tab>
+
+  <Tab title="Context Summarizer Agent">
+    The Context Summarizer Agent specializes in analyzing and summarizing academic research papers, extracting key information in accessible language.
+
+    ### Configuration
+
+    ```typescript
+    const contextAgent = new Agent({
+      name: 'contentSummarizerAgent',
+      instructions: `
+        You are an expert in reading, analyzing, and summarizing academic research papers.
+        Given any research paper, extract and present the following in clear, plain language:
+        - The main research question or objective.
+        - A brief description of the methods and approach.
+        - Key findings and results.
+        - Significance and implications of the study.
+        Focus on accuracy, clarity, and relevance; avoid technical jargon unless needed for context.
+        Summaries should be concise and accessible to a general audience.
+      `,
+    });
+    ```
+
+    ### Implementation
+
+    Located in `source/internal/agents/context-summarizer.ts:10-20`, this agent includes PDF processing capabilities:
+
+    ```typescript
+    export const getContextSummaryPostHandler = asyncHandler(async (req: Request, res: Response) => {
+      const uploadedFile = req.file;
+
+      if (!uploadedFile?.filename.endsWith('.pdf')) {
+        res.status(400).json({ error: 'Only PDF files are supported' });
+        return;
+      }
+
+      logger.info('Received file for context summarization:', uploadedFile?.originalname);
+
+      try {
+        const extractedData = await parsePDFBuffer(uploadedFile.path);
+
+        if (!extractedData) {
+          res.status(500).json({ error: 'Failed to extract text from PDF' });
+          return;
+        }
+
+        const summaryPrompt = `Summarize the following research paper:\n\n${extractedData.text}`;
+        const result = await run(contextAgent, summaryPrompt);
+
+        res.status(200).json({ summary: result.finalOutput });
+      } finally {
+        await unlink(uploadedFile.path).catch(() => {});
+      }
+    });
+    ```
+
+    ### API Endpoint
+
+    **POST** `/agents/context-summarizer`
+
+    Content-Type: `multipart/form-data`
+
+    Form field: `myFile` (PDF file, max 5MB)
+
+    Response:
+    ```json
+    {
+      "summary": "This research paper explores..."
+    }
+    ```
+
+    ### Features
+
+    - Accepts PDF files up to 5MB
+    - Extracts text using the `pdf-parse` library
+    - Automatically cleans up uploaded files after processing
+    - Provides structured summaries with research objectives, methods, findings, and implications
+  </Tab>
+</Tabs>
+
+## Error Handling
+
+All agents implement consistent error handling:
+
+<AccordionGroup>
+  <Accordion title="Input Validation">
+    Agents validate required inputs before processing:
+
+    ```typescript
+    if (!question) {
+      return res.status(400).json({ error: 'Question is required' });
+    }
+    ```
+
+    The Context Summarizer also validates file types:
+
+    ```typescript
+    if (!uploadedFile?.filename.endsWith('.pdf')) {
+      res.status(400).json({ error: 'Only PDF files are supported' });
+      return;
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Runtime Errors">
+    All agent execution is wrapped in try-catch blocks:
+
+    ```typescript
+    try {
+      const result = await run(agent, input);
+      return res.send({ answer: result.finalOutput });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Resource Cleanup">
+    The Context Summarizer ensures uploaded files are deleted after processing:
+
+    ```typescript
+    try {
+      // Process file
+    } finally {
+      await unlink(uploadedFile.path).catch(() => {});
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Creating Custom Agents
+
+To add a new agent to AgentSpace:
+
+1. **Create the agent file** in `source/internal/agents/`:
+
+```typescript
+import { Agent, run } from '@openai/agents';
+import type { Request, Response } from 'express';
+
+const myCustomAgent = new Agent({
+  name: 'MyCustomAgent',
+  instructions: 'Your specialized instructions here',
+});
+
+export const getCustomHandler = async (req: Request, res: Response) => {
+  const { input } = req.body;
+
+  if (!input) {
+    return res.status(400).json({ error: 'Input is required' });
+  }
+
+  try {
+    const result = await run(myCustomAgent, input);
+    return res.send({ result: result.finalOutput });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+```
+
+2. **Register the route** in `source/internal/router/agents.ts`:
+
+```typescript
+import { getCustomHandler } from '../agents/my-custom-agent.js';
+
+router.get('/custom', getCustomHandler);
+```
+
+3. **Test your agent** at `/agents/custom`
+
+<Note>
+  Agent instructions are crucial for performance. Be specific about the agent's expertise, expected input format, and desired output structure.
+</Note>

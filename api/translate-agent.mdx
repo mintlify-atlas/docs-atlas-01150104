@@ -1,0 +1,131 @@
+---
+title: "Translation agent"
+description: "Translate text between languages"
+---
+
+The translation agent endpoint provides AI-powered translation services between multiple languages. The agent is powered by a skilled linguist AI that can handle various translation tasks.
+
+## Endpoint
+
+```
+GET /agents/translate
+```
+
+## Request Parameters
+
+<ParamField body="question" type="string" required>
+  Your translation request. This should include the text you want to translate and specify the source and target languages.
+  
+  Example: "Translate 'Hello, how are you?' to Spanish"
+</ParamField>
+
+## Request Example
+
+```bash
+curl -X GET https://api.agentspace.com/agents/translate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Translate the phrase Hello, how are you? from English to Spanish"
+  }'
+```
+
+## Response Format
+
+<ResponseField name="answer" type="string">
+  The translation result provided by the linguist agent, including the translated text and any relevant contextual information.
+</ResponseField>
+
+## Response Example
+
+```json
+{
+  "answer": "The Spanish translation of 'Hello, how are you?' is 'Hola, ¿cómo estás?' (informal) or 'Hola, ¿cómo está?' (formal). The informal version is commonly used among friends and peers, while the formal version is appropriate for professional or respectful contexts."
+}
+```
+
+<Note>
+  The translation agent supports a wide range of languages and can handle various linguistic nuances. For best results, clearly specify both the source and target languages in your request.
+</Note>
+
+## Error Responses
+
+<Accordion title="400 Bad Request">
+  Returned when the `question` parameter is missing or empty.
+  
+  ```json
+  {
+    "error": "Question is required"
+  }
+  ```
+</Accordion>
+
+<Accordion title="500 Internal Server Error">
+  Returned when the agent encounters an unexpected error during translation.
+  
+  ```json
+  {
+    "error": "Internal server error"
+  }
+  ```
+</Accordion>
+
+## Code Examples
+
+<CodeGroup>
+
+```javascript Node.js
+const response = await fetch('https://api.agentspace.com/agents/translate', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    question: 'Translate the phrase Hello, how are you? from English to Spanish'
+  })
+});
+
+const data = await response.json();
+console.log(data.answer);
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.agentspace.com/agents/translate',
+    json={'question': 'Translate the phrase Hello, how are you? from English to Spanish'}
+)
+
+data = response.json()
+print(data['answer'])
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    requestBody, _ := json.Marshal(map[string]string{
+        "question": "Translate the phrase Hello, how are you? from English to Spanish",
+    })
+
+    resp, _ := http.NewRequest("GET", "https://api.agentspace.com/agents/translate", bytes.NewBuffer(requestBody))
+    resp.Header.Set("Content-Type", "application/json")
+    
+    client := &http.Client{}
+    response, _ := client.Do(resp)
+    defer response.Body.Close()
+    
+    var result map[string]string
+    json.NewDecoder(response.Body).Decode(&result)
+    fmt.Println(result["answer"])
+}
+```
+
+</CodeGroup>

@@ -1,0 +1,505 @@
+---
+title: 'Using agents'
+description: 'Make requests to AgentSpace agents'
+---
+
+## Overview
+
+AgentSpace provides three AI agents accessible through HTTP endpoints. All agents are mounted under the `/agents` base path and run on **http://localhost:8090** by default.
+
+## Available Agents
+
+### History Agent
+
+**Endpoint**: `GET /agents/history`
+
+An expert in world history that answers questions about historical events, figures, and periods.
+
+**Request Format**:
+```json
+{
+  "question": "What caused the fall of the Roman Empire?"
+}
+```
+
+**Response Format**:
+```json
+{
+  "answer": "The fall of the Roman Empire was caused by multiple factors including..."
+}
+```
+
+### Translation Agent
+
+**Endpoint**: `GET /agents/translate`
+
+A skilled linguist and translator that handles translation requests and language-related questions.
+
+**Request Format**:
+```json
+{
+  "question": "Translate 'Hello, how are you?' to Spanish"
+}
+```
+
+**Response Format**:
+```json
+{
+  "answer": "'Hola, ¿cómo estás?' is the Spanish translation..."
+}
+```
+
+### Context Summarizer Agent
+
+**Endpoint**: `POST /agents/context-summarizer`
+
+Summarizes academic research papers from PDF files. Extracts key information including research questions, methods, findings, and implications.
+
+**Request Format**: Multipart form data with PDF file
+
+**Response Format**:
+```json
+{
+  "summary": "This research paper investigates... The main findings include..."
+}
+```
+
+## Making HTTP Requests
+
+### Using curl
+
+#### History Agent
+
+```bash
+curl -X GET http://localhost:8090/agents/history \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What were the main causes of World War I?"
+  }'
+```
+
+#### Translation Agent
+
+```bash
+curl -X GET http://localhost:8090/agents/translate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Translate this to French: The quick brown fox jumps over the lazy dog"
+  }'
+```
+
+#### Context Summarizer Agent
+
+```bash
+curl -X POST http://localhost:8090/agents/context-summarizer \
+  -F "file=@/path/to/research-paper.pdf"
+```
+
+### Using JavaScript/fetch
+
+#### History Agent
+
+```javascript
+const response = await fetch('http://localhost:8090/agents/history', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    question: 'Who was the first emperor of China?',
+  }),
+});
+
+const data = await response.json();
+console.log(data.answer);
+```
+
+#### Translation Agent
+
+```javascript
+const response = await fetch('http://localhost:8090/agents/translate', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    question: 'How do you say "good morning" in Japanese?',
+  }),
+});
+
+const data = await response.json();
+console.log(data.answer);
+```
+
+#### Context Summarizer Agent
+
+```javascript
+const formData = new FormData();
+formData.append('file', pdfFile); // pdfFile is a File object
+
+const response = await fetch('http://localhost:8090/agents/context-summarizer', {
+  method: 'POST',
+  body: formData,
+});
+
+const data = await response.json();
+console.log(data.summary);
+```
+
+### Using Python
+
+#### History Agent
+
+```python
+import requests
+
+response = requests.get(
+    'http://localhost:8090/agents/history',
+    json={'question': 'What was the Industrial Revolution?'}
+)
+
+data = response.json()
+print(data['answer'])
+```
+
+#### Translation Agent
+
+```python
+import requests
+
+response = requests.get(
+    'http://localhost:8090/agents/translate',
+    json={'question': 'Translate "thank you" to German'}
+)
+
+data = response.json()
+print(data['answer'])
+```
+
+#### Context Summarizer Agent
+
+```python
+import requests
+
+with open('research-paper.pdf', 'rb') as f:
+    response = requests.post(
+        'http://localhost:8090/agents/context-summarizer',
+        files={'file': f}
+    )
+
+data = response.json()
+print(data['summary'])
+```
+
+## Request/Response Formats
+
+### History and Translation Agents
+
+**Request Body** (JSON):
+```json
+{
+  "question": "string"  // Required: The question or request for the agent
+}
+```
+
+**Success Response** (200 OK):
+```json
+{
+  "answer": "string"  // The agent's response
+}
+```
+
+**Error Response** (400 Bad Request):
+```json
+{
+  "error": "Question is required"
+}
+```
+
+**Error Response** (500 Internal Server Error):
+```json
+{
+  "error": "Internal server error"
+}
+```
+
+### Context Summarizer Agent
+
+**Request**: Multipart form data
+- Field name: `file`
+- Content-Type: `application/pdf` or `multipart/form-data`
+- File must have `.pdf` extension
+
+**Success Response** (200 OK):
+```json
+{
+  "summary": "string"  // Structured summary of the research paper
+}
+```
+
+**Error Responses**:
+
+400 Bad Request - Invalid file type:
+```json
+{
+  "error": "Only PDF files are supported"
+}
+```
+
+400 Bad Request - No file provided:
+```json
+{
+  "error": "Research paper is required"
+}
+```
+
+500 Internal Server Error - PDF parsing failed:
+```json
+{
+  "error": "Failed to extract text from PDF"
+}
+```
+
+## Error Handling
+
+### Common Error Scenarios
+
+1. **Missing Required Field**
+   - Status: 400 Bad Request
+   - Cause: `question` field not provided
+   - Solution: Include `question` in request body
+
+2. **Invalid File Format**
+   - Status: 400 Bad Request
+   - Cause: Non-PDF file uploaded to context-summarizer
+   - Solution: Only upload files with `.pdf` extension
+
+3. **OpenAI API Error**
+   - Status: 500 Internal Server Error
+   - Cause: Issues with OpenAI API (rate limits, invalid key, etc.)
+   - Solution: Check OpenAI API key and account status
+
+4. **PDF Parsing Error**
+   - Status: 500 Internal Server Error
+   - Cause: Corrupted or encrypted PDF
+   - Solution: Ensure PDF is valid and not password-protected
+
+### Error Handling Example
+
+```javascript
+try {
+  const response = await fetch('http://localhost:8090/agents/history', {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question: 'What is the Renaissance?' }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`API Error: ${error.error}`);
+  }
+
+  const data = await response.json();
+  console.log(data.answer);
+} catch (error) {
+  console.error('Request failed:', error.message);
+}
+```
+
+## Best Practices
+
+### 1. Always Validate Input
+
+```javascript
+function askHistoryAgent(question) {
+  if (!question || typeof question !== 'string') {
+    throw new Error('Question must be a non-empty string');
+  }
+  
+  return fetch('http://localhost:8090/agents/history', {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  });
+}
+```
+
+### 2. Handle Timeouts
+
+Agent requests may take several seconds. Set appropriate timeouts:
+
+```javascript
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+try {
+  const response = await fetch('http://localhost:8090/agents/translate', {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question: 'Translate this text...' }),
+    signal: controller.signal,
+  });
+  
+  clearTimeout(timeoutId);
+  const data = await response.json();
+  return data;
+} catch (error) {
+  if (error.name === 'AbortError') {
+    console.error('Request timed out');
+  }
+  throw error;
+}
+```
+
+### 3. Validate File Types
+
+For the context summarizer, validate files before uploading:
+
+```javascript
+function validatePDF(file) {
+  if (!file.name.endsWith('.pdf')) {
+    throw new Error('Only PDF files are supported');
+  }
+  
+  if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    throw new Error('File too large. Maximum size is 10MB');
+  }
+  
+  return true;
+}
+```
+
+### 4. Implement Retry Logic
+
+```javascript
+async function requestWithRetry(url, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) return response;
+      
+      // Don't retry client errors (400-499)
+      if (response.status >= 400 && response.status < 500) {
+        throw new Error(`Client error: ${response.status}`);
+      }
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+```
+
+### 5. Log Requests for Debugging
+
+When debugging, log requests and responses:
+
+```javascript
+async function debugRequest(endpoint, body) {
+  console.log(`[Request] ${endpoint}`, body);
+  
+  const response = await fetch(`http://localhost:8090${endpoint}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  
+  const data = await response.json();
+  console.log(`[Response] ${endpoint}`, data);
+  
+  return data;
+}
+```
+
+## Integration Examples
+
+### React Component
+
+```jsx
+import { useState } from 'react';
+
+function HistoryAgent() {
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const response = await fetch('http://localhost:8090/agents/history', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+      
+      const data = await response.json();
+      setAnswer(data.answer);
+    } catch (error) {
+      console.error('Error:', error);
+      setAnswer('Failed to get answer. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask a history question..."
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Loading...' : 'Ask'}
+        </button>
+      </form>
+      {answer && <div>{answer}</div>}
+    </div>
+  );
+}
+```
+
+### Express.js Proxy
+
+```javascript
+import express from 'express';
+import fetch from 'node-fetch';
+
+const app = express();
+app.use(express.json());
+
+// Proxy requests to AgentSpace
+app.post('/api/ask-history', async (req, res) => {
+  try {
+    const response = await fetch('http://localhost:8090/agents/history', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: req.body.question }),
+    });
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to connect to agent' });
+  }
+});
+
+app.listen(3000);
+```
+
+## Performance Considerations
+
+- **Agent Processing Time**: Each agent request involves OpenAI API calls, typically taking 2-10 seconds
+- **PDF Processing**: Large PDFs may take longer to parse and summarize (10-30 seconds)
+- **Concurrent Requests**: AgentSpace can handle multiple concurrent requests
+- **Rate Limits**: Be aware of OpenAI API rate limits on your account
+
+## Next Steps
+
+- Review the [server configuration](/guides/running-server) for deployment options
+- Check the [development setup](/guides/setup) for local development
+- Explore the source code in `internal/agents/` to understand agent implementations
