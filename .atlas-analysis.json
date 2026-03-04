@@ -1,0 +1,54 @@
+{
+  "projectType": "api-service",
+  "projectName": "AgentSpace",
+  "projectDescription": "An AI agent platform built on Express.js that provides specialized agents for translation, history, and document summarization via REST API endpoints.",
+  "theme": "mint",
+  "primaryColor": "#6366f1",
+  "lightColor": "#818cf8",
+  "darkColor": "#4f46e5",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": ["concepts/agents", "concepts/architecture"]
+          },
+          {
+            "group": "Guides",
+            "pages": ["guides/setup", "guides/running-server", "guides/using-agents"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["api/overview", "api/authentication"]
+          },
+          {
+            "group": "Endpoints",
+            "pages": ["api/history-agent", "api/translate-agent", "api/context-summarizer"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "AI-powered agents using OpenAI Agents SDK",
+    "REST API for language translation and history queries",
+    "PDF document analysis and summarization",
+    "Express.js web server with modular routing"
+  ],
+  "publicApiSurface": [
+    "GET /agents/history",
+    "GET /agents/translate",
+    "POST /agents/context-summarizer"
+  ]
+}
